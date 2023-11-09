@@ -9,7 +9,6 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
-import org.jsoup.internal.StringUtil;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -25,6 +24,7 @@ public class DefaultRutrackerClient implements RutrackerClient {
     private final AccountCredentials credentials;
 
     private final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-LLL-yy HH:mm", new Locale("ru", "RU"));
+    private final SimpleDateFormat profileDateFormatter = new SimpleDateFormat("yyyy-LL-dd", new Locale("ru", "RU"));
 
     private Map<String, String> cookies;
 
@@ -47,33 +47,32 @@ public class DefaultRutrackerClient implements RutrackerClient {
     }
 
     @Override
+    @SneakyThrows
     public User findUserById(@NonNull long id) {
         Document document = getDocument(String.format(Url.USER_URL.getValue(), id));
-        Elements elements = document.getElementsByClass("user_details borderless w100");
+        Elements elements = document.getElementById("main_content").getAllElements();
 
         return User.builder()
+                .id(id)
                 .nickname(elements.first().getElementById("profile-uname").text())
                 .country(extractCountry(elements.first()))
-//                .giveaways(elements.stream()
-//                        .skip(1L)
-//                        .map(e -> Giveaway.builder()
-//                                        .id(id)
-//                                        .size()
-//                                                .link()
-//
-//                                e.getElementsByClass("med").text())
-//                        .toList())
-
-                // TODO: 05.11.2023
-                //.lastVisit(elements.first().getElementsByClass())
+                .lastVisit(profileDateFormatter.parse(getElementByXPath(document, Xpath.LAST_VISIT)
+                                .attr("title")
+                        .replace("Посл. визит: ", "")))
+                .registered(profileDateFormatter.parse(getElementByXPath(document, Xpath.REGISTERED).text()))
                 //.seniority()
                 .build();
+
     }
 
     @Override
     public Torrent findTorrentFileById(@NonNull long id) {
         Document document = getDocument(Url.TOREENT_DOWNLOAD_URL.insertId(id));
         return getTorrent(document);
+    }
+
+    private Element getElementByXPath(Document document, Xpath xpath) {
+        return document.selectXpath(xpath.getValue()).first();
     }
 
     private Torrent getTorrent(Document document) {
@@ -85,7 +84,7 @@ public class DefaultRutrackerClient implements RutrackerClient {
         return Torrent.builder()
                 .id(id)
                 .link(Url.TOREENT_DOWNLOAD_URL.insertId(id))
-                //.magnetLink()
+                .magnetLink(document.selectXpath(Xpath.TORRENT_MAGNET_LINK.getValue()).first().attr("href"))
                 .build();
     }
 
