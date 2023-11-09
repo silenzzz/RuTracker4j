@@ -10,5 +10,6 @@ import lombok.experimental.SuperBuilder;
 public class Torrent extends BaseEntity {
 
     private String link;
+    private String magnetLink;
 
 }

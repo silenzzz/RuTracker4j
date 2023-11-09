@@ -1,6 +1,7 @@
 package dev.demmage.rutracker.api;
 
 import dev.demmage.rutracker.api.constant.Url;
+import dev.demmage.rutracker.api.constant.Xpath;
 import dev.demmage.rutracker.api.domain.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,7 +40,9 @@ public class DefaultRutrackerClient implements RutrackerClient {
         return Topic.builder()
                 .id(id)
                 .title(document.getElementById("topic-title").text())
+                .category(getCategory(document))
                 .posts(getPosts(document))
+                .torrent(getTorrent(document))
                 .build();
     }
 
@@ -69,9 +72,31 @@ public class DefaultRutrackerClient implements RutrackerClient {
 
     @Override
     public Torrent findTorrentFileById(@NonNull long id) {
-        Document document = getDocument(Url.TOREENT_DOWNLOAD_URL.getValue());
+        Document document = getDocument(Url.TOREENT_DOWNLOAD_URL.insertId(id));
+        return getTorrent(document);
+    }
 
-        return null;
+    private Torrent getTorrent(Document document) {
+        long id = Long.parseLong(document.selectXpath(Xpath.TORRENT_LINK.getValue())
+                .first()
+                .attr("href")
+                .replace("dl.php?t=", ""));
+
+        return Torrent.builder()
+                .id(id)
+                .link(Url.TOREENT_DOWNLOAD_URL.insertId(id))
+                //.magnetLink()
+                .build();
+    }
+
+    private Category getCategory(Document document) {
+        return Category.builder()
+                .id(Long.parseLong(document.selectXpath(Xpath.CATEGORY.getValue())
+                        .first()
+                        .attr("href")
+                        .replace("viewforum.php?f=", "")))
+                .name(document.selectXpath(Xpath.CATEGORY.getValue()).first().text())
+                .build();
     }
 
     private List<Post> getPosts(Document document) {

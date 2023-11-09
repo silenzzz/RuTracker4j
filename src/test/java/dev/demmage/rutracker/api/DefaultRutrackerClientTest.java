@@ -1,9 +1,6 @@
 package dev.demmage.rutracker.api;
 
-import dev.demmage.rutracker.api.domain.Category;
-import dev.demmage.rutracker.api.domain.Country;
-import dev.demmage.rutracker.api.domain.Post;
-import dev.demmage.rutracker.api.domain.Topic;
+import dev.demmage.rutracker.api.domain.*;
 import org.junit.jupiter.api.*;
 
 import javax.security.auth.login.CredentialException;
@@ -23,13 +20,19 @@ class DefaultRutrackerClientTest {
     @Test
     @Timeout(30)
     void shouldReturnTopic() {
-        Topic topicById = rutrackerClient.findTopicById(6358253);
+        final long id = 6358253;
+        Topic topicById = rutrackerClient.findTopicById(id);
 
         assertNotNull(topicById);
         assertEquals(Category.builder()
                 .id(2012)
                 .name("Самолёты и вертолёты для X-Plane")
                 .build(), topicById.getCategory());
+
+        assertEquals(Torrent.builder()
+                .id(id)
+                .link("https://rutracker.org/forum/dl.php?t=6358253")
+                .build(), topicById.getTorrent());
 
         Post post1 = topicById.getPosts().get(0);
         assertEquals("Guiluerme Macedo", post1.getUser().getNickname());

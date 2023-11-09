@@ -16,5 +16,6 @@ public class Topic extends BaseEntity {
     private List<Post> posts;
     private Attach attach;
     private Category category;
+    private Torrent torrent;
 
 }
