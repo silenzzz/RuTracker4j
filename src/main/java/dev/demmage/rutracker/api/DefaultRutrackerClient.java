@@ -1,10 +1,7 @@
 package dev.demmage.rutracker.api;
 
 import dev.demmage.rutracker.api.constant.Url;
-import dev.demmage.rutracker.api.domain.Torrent;
-import dev.demmage.rutracker.api.domain.User;
-import dev.demmage.rutracker.api.domain.Post;
-import dev.demmage.rutracker.api.domain.Topic;
+import dev.demmage.rutracker.api.domain.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NonNull;
@@ -49,21 +46,31 @@ public class DefaultRutrackerClient implements RutrackerClient {
     @Override
     public User findUserById(@NonNull long id) {
         Document document = getDocument(String.format(Url.USER_URL.getValue(), id));
-        Elements elementsByClass = document.getElementsByClass("user_details borderless w100");
+        Elements elements = document.getElementsByClass("user_details borderless w100");
 
-//        elementsByClass.stream()
-//                .map(e -> {
+        return User.builder()
+                .nickname(elements.first().getElementById("profile-uname").text())
+                .country(extractCountry(elements.first()))
+//                .giveaways(elements.stream()
+//                        .skip(1L)
+//                        .map(e -> Giveaway.builder()
+//                                        .id(id)
+//                                        .size()
+//                                                .link()
 //
-//                })
-//
-//        Element authorElement = e.getElementsByClass("poster_info td1 hide-for-print").first();
-//        Element postElement = e.getElementsByClass("message td2").first();
+//                                e.getElementsByClass("med").text())
+//                        .toList())
 
-        return null;
+                // TODO: 05.11.2023
+                //.lastVisit(elements.first().getElementsByClass())
+                //.seniority()
+                .build();
     }
 
     @Override
-    public Torrent findTorrentFileById(long id) {
+    public Torrent findTorrentFileById(@NonNull long id) {
+        Document document = getDocument(Url.TOREENT_DOWNLOAD_URL.getValue());
+
         return null;
     }
 
@@ -82,13 +89,26 @@ public class DefaultRutrackerClient implements RutrackerClient {
                 .date(extractDate(e))
                 .user(User.builder()
                         .id(extractId(e))
-                        .nickname(e.getElementsByClass("nick ").first().text())
+                        .nickname(extractNickname(e))
                         .messagesCount(extractMessageId(authorElement))
-                        //.country(Optional.of(authorElement.getElementsByClass("poster-flag").first().attr("title")).orElse("undefined"))
+                        .country(extractCountry(e))
                         .build())
                 .bodyText(postElement.getElementsByClass("post_body").first().text())
                 .bodyHtml(postElement.getElementsByClass("post_body").first().html())
                 .build();
+    }
+
+    private Country extractCountry(Element e) {
+        Element element = e.getElementsByClass("poster-flag").first();
+
+        if (element == null) {
+            return new Country();
+        }
+
+        String title = element.attr("title");
+        String src = element.attr("src");
+
+        return new Country(title, src);
     }
 
     private long extractMessageId(Element e) {
@@ -114,21 +134,22 @@ public class DefaultRutrackerClient implements RutrackerClient {
 
     private long extractId(Element e) {
         return Long.parseLong(e.getElementsByClass("txtb")
-                        .stream()
-                        .filter(element -> element.text().equals("[Профиль]"))
-                        .map(element -> element.attr("href"))
-                        .map(s -> s.substring(31))
-                        .findFirst().orElseThrow());
+                .stream()
+                .filter(element -> element.text().equals("[Профиль]"))
+                .map(element -> element.attr("href"))
+                .map(s -> s.substring(31))
+                .findFirst().orElseThrow());
     }
 
     private String extractNickname(Element e) {
-//        String nickname =
-//
-//        if (nickname.isEmpty()) {
-//            return e.getElementsByClass("nick nick-author").first().text();
-//        }
+        Elements elementsByClass = e.getElementsByClass("poster_info td1 hide-for-print");
+        String nickname = elementsByClass.first().getElementsByClass("nick ").text();
 
-        return null;
+        if (nickname.isEmpty()) {
+            return elementsByClass.first().getElementsByClass("nick nick-author").text();
+        }
+
+        return nickname;
     }
 
     @SneakyThrows

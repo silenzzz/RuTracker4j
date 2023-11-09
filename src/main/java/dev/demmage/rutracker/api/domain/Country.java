@@ -7,9 +7,11 @@ import lombok.experimental.SuperBuilder;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @SuperBuilder
-public class Attach extends BaseEntity {
+public class Country {
 
-    
+    private String name;
+    private String flagUrl;
 
 }
