@@ -10,8 +10,7 @@ RutrackerClient client = new DefaultRutrackerClient(new AccountCredentials("user
 
 ### Docs
 
-####
-Default implementation: ``DefaultRutrackerClient``
+#### Default implementation: ``DefaultRutrackerClient``
 
 
 | Class           | Mehod                        | Docs                    |
