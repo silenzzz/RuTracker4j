@@ -1,8 +1,11 @@
 package dev.demmage.rutracker.api;
 
+import dev.demmage.rutracker.api.domain.Category;
 import dev.demmage.rutracker.api.domain.Topic;
 import dev.demmage.rutracker.api.domain.Torrent;
 import dev.demmage.rutracker.api.domain.User;
+
+import java.util.List;
 
 public interface RutrackerClient {
 
@@ -26,5 +29,11 @@ public interface RutrackerClient {
      * @return Torrent
      */
     Torrent findTorrentFileById(long id);
+
+    /**
+     * Get all rutracker.org categories
+     * @return List with categories
+     */
+    List<Category> getAllCategories();
 
 }

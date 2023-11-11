@@ -1,6 +1,6 @@
 package dev.demmage.rutracker.api.constant;
 
-public enum ValueType {
+public enum SizeType {
 
     MB,
     GB

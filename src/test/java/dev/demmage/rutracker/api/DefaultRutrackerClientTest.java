@@ -1,36 +1,45 @@
 package dev.demmage.rutracker.api;
 
+import dev.demmage.rutracker.api.constant.SizeType;
 import dev.demmage.rutracker.api.domain.*;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.*;
 
 import javax.security.auth.login.CredentialException;
 
-import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Locale;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Timeout(30)
 class DefaultRutrackerClientTest {
 
-    private RutrackerClient rutrackerClient;
+    private static RutrackerClient rutrackerClient;
 
     private final SimpleDateFormat profileDateFormatter = new SimpleDateFormat("yyyy-LL-dd", new Locale("ru", "RU"));
 
     private static final long TOPIC_ID = 6358253;
 
-    private Topic topic;
+    private static Topic topic;
 
-    @Test
-    @BeforeEach
-    void shouldReturnTopic() {
+    @BeforeAll
+    static void setup() {
         rutrackerClient = new DefaultRutrackerClient(new AccountCredentials(System.getProperty("username"), System.getProperty("password")));
         topic = rutrackerClient.findTopicById(TOPIC_ID);
+    }
 
+    @Test
+    void shouldReturnTopic() {
         assertNotNull(topic);
         assertEquals(topic.getTitle(), "[X-Plane 11] [X11] - Aerobask Phenom 300 [ENG]");
+        assertEquals(new Category("Самолёты и вертолёты для X-Plane"), topic.getCategory());
+        assertThat(topic.getSuperCategories())
+                .isNotNull()
+                .hasSameElementsAs(List.of(new Category("Прочее для Microsoft Flight Simulator, Prepar3D, X-Plane"),
+                        new Category("Игры"), new Category("Самолёты и вертолёты для X-Plane")));
         assertFalse(topic.getPosts().isEmpty());
     }
 
@@ -41,6 +50,8 @@ class DefaultRutrackerClientTest {
                 .id(TOPIC_ID)
                 .link("https://rutracker.org/forum/dl.php?t=6358253")
                 .magnetLink("magnet:?xt=urn:btih:044419ACCC05D780A2A3C91FAEE7AD6373D1F626&tr=http%3A%2F%2Fbt3.t-ru.org%2Fann%3Fmagnet")
+                .filesSize(1.24F)
+                .fileSizeType(SizeType.GB)
                 .build(), topic.getTorrent());
     }
 
@@ -49,7 +60,6 @@ class DefaultRutrackerClientTest {
         assertEquals(Torrent.builder()
                 .id(TOPIC_ID)
                 .link("https://rutracker.org/forum/dl.php?t=6358253")
-                .magnetLink("magnet:?xt=urn:btih:044419ACCC05D780A2A3C91FAEE7AD6373D1F626&tr=http%3A%2F%2Fbt3.t-ru.org%2Fann%3Fmagnet")
                 .build(), rutrackerClient.findTorrentFileById(TOPIC_ID));
     }
 
@@ -125,6 +135,12 @@ class DefaultRutrackerClientTest {
         assertThrows(CredentialException.class, () -> {
             RutrackerClient defaultRutrackerClient = new DefaultRutrackerClient(new AccountCredentials("123", "123"));
         });
+    }
+
+    @Test
+    void shouldReturnAllCategories() {
+        List<Category> categories = rutrackerClient.getAllCategories();
+        assertThat(categories).hasSize(1190);
     }
 
     @Test

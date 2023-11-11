@@ -1,6 +1,7 @@
 package dev.demmage.rutracker.api;
 
 import dev.demmage.rutracker.api.constant.Url;
+import dev.demmage.rutracker.api.constant.SizeType;
 import dev.demmage.rutracker.api.constant.Xpath;
 import dev.demmage.rutracker.api.domain.*;
 import lombok.AllArgsConstructor;
@@ -44,15 +45,23 @@ public class DefaultRutrackerClient implements RutrackerClient {
 
     @Override
     public Topic findTopicById(@NonNull long id) {
-        Document document = getDocument(String.format(Url.TOPIC_URL.getValue(), id));
+        Document document = getDocument(Url.TOPIC_URL.insertId(id));
 
         return Topic.builder()
                 .id(id)
                 .title(document.getElementById("topic-title").text())
                 .category(getCategory(document))
+                .superCategories(extractSuperCategories(document))
                 .posts(getPosts(document))
                 .torrent(getTorrent(document))
                 .build();
+    }
+
+    private List<Category> extractSuperCategories(Document document) {
+        Elements root = document.selectXpath(Xpath.SUPER_CATEGORIES.getValue());
+        return Arrays.stream(root.first().text().replace(" » ", ";").split(";"))
+                .map(Category::new)
+                .toList();
     }
 
     @Override
@@ -72,13 +81,25 @@ public class DefaultRutrackerClient implements RutrackerClient {
                 .messagesCount(Long.parseLong(getElementByXPath(document, Xpath.MESSAGES_COUNT).text()))
                 .seniority(getElementByXPath(document, Xpath.USER_SENIORITY).text())
                 .build();
-
     }
 
     @Override
     public Torrent findTorrentFileById(@NonNull long id) {
-        Document document = getDocument(Url.TOREENT_DOWNLOAD_URL.insertId(id));
-        return getTorrent(document);
+        return Torrent.builder()
+                .id(id)
+                .link(Url.TOREENT_DOWNLOAD_URL.insertId(id))
+                // FIXME: 11.11.2023 
+                //.magnetLink(Url.TOREENT_DOWNLOAD_MAGNET_URL.insertId(id))
+                .build();
+    }
+
+    @Override
+    public List<Category> getAllCategories() {
+        Document document = getDocument(Url.CATEGORIS_URL.getValue());
+        return Arrays.stream(document.selectXpath(Xpath.ALL_CATEGORIES.getValue()).first().text()
+                .split("\\|- "))
+                .map(Category::new)
+                .toList();
     }
 
     private Element getElementByXPath(Document document, Xpath xpath) {
@@ -90,9 +111,13 @@ public class DefaultRutrackerClient implements RutrackerClient {
                 .first()
                 .attr("href")
                 .replace("dl.php?t=", ""));
+        
+        String[] raw = document.selectXpath(Xpath.TORRENT_FILE_SIZE.getValue()).first().text().split(" ");
 
         return Torrent.builder()
                 .id(id)
+                .filesSize(Float.parseFloat(raw[0]))
+                .fileSizeType(SizeType.valueOf(raw[1]))
                 .link(Url.TOREENT_DOWNLOAD_URL.insertId(id))
                 .magnetLink(document.selectXpath(Xpath.TORRENT_MAGNET_LINK.getValue()).first().attr("href"))
                 .build();
