@@ -8,14 +8,16 @@ import javax.security.auth.login.CredentialException;
 
 import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Timeout(30)
 class DefaultRutrackerClientTest {
 
     private RutrackerClient rutrackerClient;
 
-    private final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-LL-dd");
+    private final SimpleDateFormat profileDateFormatter = new SimpleDateFormat("yyyy-LL-dd", new Locale("ru", "RU"));
 
     private static final long TOPIC_ID = 6358253;
 
@@ -23,7 +25,6 @@ class DefaultRutrackerClientTest {
 
     @Test
     @BeforeEach
-    @Timeout(30)
     void shouldReturnTopic() {
         rutrackerClient = new DefaultRutrackerClient(new AccountCredentials(System.getProperty("username"), System.getProperty("password")));
         topic = rutrackerClient.findTopicById(TOPIC_ID);
@@ -41,6 +42,15 @@ class DefaultRutrackerClientTest {
                 .link("https://rutracker.org/forum/dl.php?t=6358253")
                 .magnetLink("magnet:?xt=urn:btih:044419ACCC05D780A2A3C91FAEE7AD6373D1F626&tr=http%3A%2F%2Fbt3.t-ru.org%2Fann%3Fmagnet")
                 .build(), topic.getTorrent());
+    }
+
+    @Test
+    void shouldReturnTorrentFileByID() {
+        assertEquals(Torrent.builder()
+                .id(TOPIC_ID)
+                .link("https://rutracker.org/forum/dl.php?t=6358253")
+                .magnetLink("magnet:?xt=urn:btih:044419ACCC05D780A2A3C91FAEE7AD6373D1F626&tr=http%3A%2F%2Fbt3.t-ru.org%2Fann%3Fmagnet")
+                .build(), rutrackerClient.findTorrentFileById(TOPIC_ID));
     }
 
     @Test
@@ -94,6 +104,7 @@ class DefaultRutrackerClientTest {
     }
 
     @Test
+    @SneakyThrows
     void shouldReturnUserById() {
         User userById = rutrackerClient.findUserById(8117637);
 
@@ -101,13 +112,19 @@ class DefaultRutrackerClientTest {
         assertEquals("alsevas", userById.getNickname());
         assertEquals(8117637, userById.getId());
         assertEquals(new Country("СССР", "https://static.rutracker.cc/flags/182.gif"), userById.getCountry());
+        assertEquals(28, userById.getMessagesCount());
+        assertEquals(profileDateFormatter.parse("2009-01-21"), userById.getRegistered());
+        assertEquals(profileDateFormatter.parse("2023-11-10"), userById.getLastVisit());
+        assertEquals("14 лет 9 месяцев", userById.getSeniority());
     }
 
     @Test
     @Disabled
         // FIXME: 05.11.2023
     void shouldThrowLoginExceptionWhenWrongCredentialsGiven() {
-        assertThrows(CredentialException.class, () -> new DefaultRutrackerClient(new AccountCredentials("123", "123")));
+        assertThrows(CredentialException.class, () -> {
+            RutrackerClient defaultRutrackerClient = new DefaultRutrackerClient(new AccountCredentials("123", "123"));
+        });
     }
 
     @Test

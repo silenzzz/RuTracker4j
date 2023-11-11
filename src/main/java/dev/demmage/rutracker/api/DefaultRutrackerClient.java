@@ -14,6 +14,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import javax.security.auth.login.CredentialException;
+import java.net.Proxy;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -28,8 +29,16 @@ public class DefaultRutrackerClient implements RutrackerClient {
 
     private Map<String, String> cookies;
 
+    private Proxy proxy = null;
+
     public DefaultRutrackerClient(@NonNull AccountCredentials credentials) {
         this.credentials = credentials;
+        refreshCookies();
+    }
+
+    public DefaultRutrackerClient(@NonNull AccountCredentials credentials, Proxy proxy) {
+        this.credentials = credentials;
+        this.proxy = proxy;
         refreshCookies();
     }
 
@@ -60,7 +69,8 @@ public class DefaultRutrackerClient implements RutrackerClient {
                                 .attr("title")
                         .replace("Посл. визит: ", "")))
                 .registered(profileDateFormatter.parse(getElementByXPath(document, Xpath.REGISTERED).text()))
-                //.seniority()
+                .messagesCount(Long.parseLong(getElementByXPath(document, Xpath.MESSAGES_COUNT).text()))
+                .seniority(getElementByXPath(document, Xpath.USER_SENIORITY).text())
                 .build();
 
     }
@@ -143,6 +153,7 @@ public class DefaultRutrackerClient implements RutrackerClient {
     private void refreshCookies() {
         Connection.Response response = Jsoup.connect(Url.LOGIN_URL.getValue())
                 .followRedirects(false)
+                .proxy(proxy)
                 .data(Map.of("login_username", credentials.getUsername(),
                         "login_password", credentials.getPassword(),
                         "login", "Enter"))
@@ -191,6 +202,7 @@ public class DefaultRutrackerClient implements RutrackerClient {
         refreshCookies();
 
         return Jsoup.connect(url)
+                .proxy(proxy)
                 .cookies(cookies)
                 .get();
     }

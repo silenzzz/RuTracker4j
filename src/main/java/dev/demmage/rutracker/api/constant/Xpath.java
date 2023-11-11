@@ -8,6 +8,8 @@ import lombok.Getter;
 public enum Xpath {
 
     USER(""),
+    USER_SENIORITY("/html/body/div[4]/div[1]/div[2]/table/tbody/tr/td/div/table/tbody/tr[2]/td[2]/table/tbody/tr[1]/td/b"),
+    MESSAGES_COUNT("/html/body/div[4]/div[1]/div[2]/table/tbody/tr/td/div/table/tbody/tr[2]/td[2]/table/tbody/tr[3]/td/div/ul/li[1]/a/b"),
     REGISTERED("/html/body/div[4]/div[1]/div[2]/table/tbody/tr/td/div/table/tbody/tr[2]/td[2]/table/tbody/tr[2]/td/b"),
     LAST_VISIT("/html/body/div[4]/div[1]/div[2]/table/tbody/tr/td/div/table/tbody/tr[2]/td[1]/table/tbody/tr[1]/td"),
     CATEGORY("/html[1]/body[1]/div[4]/div[1]/div[3]/table[1]/tbody[1]/tr[1]/td[1]/div[1]/table[1]/tbody[1]/tr[1]/td[1]/table[1]/tbody[1]/tr[1]/td[2]/a[3]"),
