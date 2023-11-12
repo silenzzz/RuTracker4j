@@ -44,6 +44,16 @@ public class DefaultRutrackerClient implements RutrackerClient {
     }
 
     @Override
+    public Category findCategoryById(long id) {
+        return null;
+    }
+
+    @Override
+    public List<Topic> searchTopics(SearchCondition searchCondition) {
+        return null;
+    }
+
+    @Override
     public Topic findTopicById(@NonNull long id) {
         Document document = getDocument(Url.TOPIC_URL.insertId(id));
 
@@ -96,6 +106,8 @@ public class DefaultRutrackerClient implements RutrackerClient {
     @Override
     public List<Category> getAllCategories() {
         Document document = getDocument(Url.CATEGORIS_URL.getValue());
+        Elements root = document.selectXpath("//*[@id=\"fs-main\"]");
+
         return Arrays.stream(document.selectXpath(Xpath.ALL_CATEGORIES.getValue()).first().text()
                 .split("\\|- "))
                 .map(Category::new)

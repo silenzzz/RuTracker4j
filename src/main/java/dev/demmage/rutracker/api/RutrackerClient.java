@@ -1,9 +1,6 @@
 package dev.demmage.rutracker.api;
 
-import dev.demmage.rutracker.api.domain.Category;
-import dev.demmage.rutracker.api.domain.Topic;
-import dev.demmage.rutracker.api.domain.Torrent;
-import dev.demmage.rutracker.api.domain.User;
+import dev.demmage.rutracker.api.domain.*;
 
 import java.util.List;
 
@@ -35,5 +32,9 @@ public interface RutrackerClient {
      * @return List with categories
      */
     List<Category> getAllCategories();
+
+    Category findCategoryById(long id);
+
+    List<Topic> searchTopics(SearchCondition searchCondition);
 
 }
