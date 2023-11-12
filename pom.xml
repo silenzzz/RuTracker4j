@@ -16,6 +16,20 @@
         <junit5.version>5.9.2</junit5.version>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>Github packages</name>
+            <url>https://maven.pkg.github.com/DeMmAge/rutracker-api</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </distributionManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
