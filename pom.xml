@@ -4,11 +4,19 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>dev.demmage</groupId>
+    <groupId>dev.silenzzz</groupId>
     <artifactId>rutracker-api</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.0.1-SNAPSHOT</version>
 
     <properties>
+        <guava.version>33.0.0-jre</guava.version>
+        <mockito-core.version>5.7.0</mockito-core.version>
+        <assertj-core.version>3.16.1</assertj-core.version>
+        <commons-lang3.version>3.14.0</commons-lang3.version>
+        <jsoup.version>1.17.2</jsoup.version>
+        <slf4j-api.version>2.0.12</slf4j-api.version>
+        <logback-classic.version>1.5.3</logback-classic.version>
+        <lombok.version>1.18.30</lombok.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -20,7 +28,7 @@
         <repository>
             <id>github</id>
             <name>Github packages</name>
-            <url>https://maven.pkg.github.com/DeMmAge/rutracker-api</url>
+<!--            <pageURL>https://maven.pkg.github.com/silenzzz/rutracker-api</pageURL>-->
         </repository>
     </distributionManagement>
 
@@ -28,20 +36,39 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.30</version>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback-classic.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j-api.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.16.1</version>
+            <version>${jsoup.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <version>3.0.2</version>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
         </dependency>
 
         <dependency>
@@ -54,14 +81,14 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.16.1</version>
+            <version>${assertj-core.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>5.7.0</version>
+            <version>${mockito-core.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -72,5 +99,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
 </project>
