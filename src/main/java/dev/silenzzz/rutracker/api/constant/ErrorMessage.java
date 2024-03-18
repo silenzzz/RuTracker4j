@@ -1,6 +1,5 @@
 package dev.silenzzz.rutracker.api.constant;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

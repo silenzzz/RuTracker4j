@@ -1,7 +1,6 @@
 package dev.silenzzz.rutracker.api;
 
 import dev.silenzzz.rutracker.api.constant.SizeType;
-import dev.silenzzz.rutracker.api.domain.*;
 import dev.silenzzz.rutracker.api.value.AccountCredentials;
 import dev.silenzzz.rutracker.api.domain.Category;
 import dev.silenzzz.rutracker.api.domain.Country;
