@@ -1,3 +1,3 @@
-# RuTracker-API
+# RuTracker4j
 
 # __IN PROGRESS__

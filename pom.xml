@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>dev.silenzzz</groupId>
-    <artifactId>rutracker-api</artifactId>
+    <artifactId>RuTracker4j</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
     <properties>
@@ -23,14 +23,6 @@
 
         <junit5.version>5.9.2</junit5.version>
     </properties>
-
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>Github packages</name>
-<!--            <pageURL>https://maven.pkg.github.com/silenzzz/rutracker-api</pageURL>-->
-        </repository>
-    </distributionManagement>
 
     <dependencies>
         <dependency>
