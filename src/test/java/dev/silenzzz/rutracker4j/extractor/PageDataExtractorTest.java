@@ -10,8 +10,8 @@ import dev.silenzzz.rutracker4j.exception.RuTrackerParseException;
 import dev.silenzzz.rutracker4j.net.JSoupHttpClient;
 import dev.silenzzz.rutracker4j.value.AccountCredentials;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -28,11 +28,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @see <a href="https://github.com/silenzzz">github.com/silenzzz</a>
  * @see <a href="mailto:silenzzzdev@gmail.com">silenzzz</a>
  */
+@EnabledIf(value = "ifEnvironmentVariablesSet")
 class PageDataExtractorTest {
 
     private JSoupHttpClient client;
 
     private PageDataExtractor extractor;
+
+    private static boolean ifEnvironmentVariablesSet() {
+        return System.getenv("USERNAME") != null && System.getenv("PASSWORD") != null;
+    }
 
     @BeforeEach
     @Test
@@ -40,8 +45,8 @@ class PageDataExtractorTest {
         assertDoesNotThrow(() -> {
                     client = new JSoupHttpClient(
                             new AccountCredentials(
-                                    System.getProperty("username"),
-                                    System.getProperty("password")
+                                    System.getenv("USERNAME"),
+                                    System.getenv("PASSWORD")
                             ),
                             null
                     );
@@ -106,6 +111,46 @@ class PageDataExtractorTest {
     @ValueSource(longs = {1L, 2L, 12L, 1234L, 12345L, 123456L, 123123123L, 0L, -1L})
     void shouldThrowNotFoundExceptionWhenCategoryNotFound(long id) {
         assertThrows(RuTrackerException.class, () -> extractor.findCategoryById(id));
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {6231554L, 6091099L, 6502335L})
+    void shouldReturnTopicsByIds(long id) throws RuTrackerException {
+        Topic topic = extractor.findTopicById(id);
+
+        assertThat(topic)
+                .isNotNull()
+                .hasNoNullFieldsOrProperties();
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {6231554L, 6091099L, 6502335L})
+    void shouldReturnAttachesByIds(long id) throws RuTrackerException {
+        Attach attach = extractor.findAttachById(id);
+
+        assertThat(attach)
+                .isNotNull()
+                .hasNoNullFieldsOrProperties();
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {6231554L, 6091099L, 6502335L})
+    void shouldReturnTorrentsByIds(long id) throws RuTrackerException {
+        Torrent torrent = extractor.findTorrentById(id);
+
+        assertThat(torrent)
+                .isNotNull()
+                .hasNoNullFieldsOrProperties();
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {2093L, 2475L, 2527})
+    void shouldReturnCategoriesByIds(long id) throws RuTrackerException {
+        Category category = extractor.findCategoryById(id);
+
+        assertThat(category)
+                .isNotNull()
+                .hasNoNullFieldsOrProperties();
     }
 
     @Test

@@ -26,8 +26,8 @@ class JSoupHttpClientTest {
         assertDoesNotThrow(() ->
                 client = new JSoupHttpClient(
                         new AccountCredentials(
-                                System.getProperty("username"),
-                                System.getProperty("password")
+                                System.getenv("USERNAME"),
+                                System.getenv("PASSWORD")
                         ),
                         null // TODO NOSONAR
                 )
