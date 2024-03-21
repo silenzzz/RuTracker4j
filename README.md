@@ -37,15 +37,27 @@ See wiki on [GitHub](https://github.com/silenzzz/RuTracker4j/wiki).
 
 ## Usage
 
+### Create rutracker client
+
 ```java
 import com.example.RuTracker4j;
+import dev.silenzzz.rutracker4j.RuTracker4jDefaultClient;
+import dev.silenzzz.rutracker4j.scrapper.net.AccountCredentials;
 
-public class Main {
-    public static void main(String[] args) {
-        RuTracker4j ruTracker = new RuTracker4j("your_api_key");
-    }
-}
+//...//
+RuTracker4j ruTracker = new RuTracker4jDefaultClient(new AccountCredentials("user", "pass"));
+///...//
 ```
+
+### Get topic
+
+```java
+//...//
+Topic topic = ruTracker.findTopicById(633781);
+///...//
+```
+
+TODO more examples
 
 ## License
 
