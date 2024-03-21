@@ -1,6 +1,6 @@
 # RuTracker4j
 
-A Java library that provides access to RuTracker.org API.
+A Java library that provides access to RuTracker.org.
 
 ## Features
 
