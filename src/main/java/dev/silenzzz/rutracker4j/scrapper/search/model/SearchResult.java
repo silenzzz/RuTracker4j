@@ -15,7 +15,7 @@ import java.util.List;
 public class SearchResult {
 
     @Getter
-    private static final List<TopicReference> topicReferences = new ArrayList<>();
+    private final List<TopicReference> topicReferences = new ArrayList<>();
 
     public void addTopicReference(TopicReference topicReference) {
         topicReferences.add(topicReference);

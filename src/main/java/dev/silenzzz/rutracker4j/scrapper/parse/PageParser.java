@@ -74,13 +74,13 @@ public class PageParser {
 
         document.select(Query.TOPIC_ROW.getValue())
                 .forEach(e -> result.addTopicReference(TopicReference.builder()
-                        .id(Long.parseLong(e.select(Query.TOPIC_TITLE.getValue()).attr("data-topic_id")))
+                        .id(Long.parseLong(e.select(Query.TOPIC_TITLE_ROW.getValue()).attr("data-topic_id")))
                         .title(e.select(Query.TOPIC_TITLE_ROW.getValue()).text())
 
                         .categoryReference(CategoryReference.builder()
                                 .id(Long.parseLong(e.select(Query.TOPIC_CATEGORY_ROW.getValue())
                                         .attr("href")
-                                        .replace("viewtopic.php?t=", "")))
+                                        .replace("tracker.php?f=", "")))
 
                                 .title(e.select(Query.TOPIC_CATEGORY_ROW.getValue()).text())
                                 .build())

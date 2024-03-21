@@ -30,14 +30,13 @@ public class SearchEngine {
     }
 
     public SearchResult search(SearchQuery query) throws SearchException {
-        String url;
-
         try {
-            url = uriBuilder
+            String url = uriBuilder
                     .addParameter("f", query.getCategories().stream()
                             .map(c -> String.valueOf(c.getId()))
                             .collect(Collectors.joining(",")))
                     .addParameter("nm", query.getText())
+                    .addParameter("start", String.valueOf(query.getPagination().getStartIndex()))
                     .build()
                     .toString();
 

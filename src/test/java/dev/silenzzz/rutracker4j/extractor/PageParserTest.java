@@ -35,8 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class PageParserTest {
 
     private JSoupHttpClient client;
-
-    private PageParser extractor;
+    private PageParser parser;
 
     private static boolean ifEnvironmentVariablesSet() {
         return System.getenv("USERNAME") != null && System.getenv("PASSWORD") != null;
@@ -53,7 +52,7 @@ class PageParserTest {
                             ),
                             null
                     );
-                    extractor = new PageParser(client);
+                    parser = new PageParser(client);
                 }
         );
     }
@@ -61,7 +60,7 @@ class PageParserTest {
     @Test
     void shouldReturnCategoryById() throws ParseException {
         Category expected = categorySample();
-        Category actual = extractor.findCategoryById(expected.getId());
+        Category actual = parser.findCategoryById(expected.getId());
 
         assertThat(actual)
                 .isNotNull()
@@ -72,7 +71,7 @@ class PageParserTest {
     @Test
     void shouldReturnTorrentById() throws RuTracker4jException {
         Torrent expected = torrentSample();
-        Torrent actual = extractor.findTorrentById(expected.getId());
+        Torrent actual = parser.findTorrentById(expected.getId());
 
         assertThat(actual)
                 .isNotNull()
@@ -83,7 +82,7 @@ class PageParserTest {
     @Test
     void shouldReturnTopicById() throws RuTracker4jException {
         long id = 6499423L;
-        Topic topicById = extractor.findTopicById(id);
+        Topic topicById = parser.findTopicById(id);
         assertThat(topicById)
                 .isNotNull()
                 .hasFieldOrPropertyWithValue("id", id)
@@ -92,34 +91,35 @@ class PageParserTest {
                 .hasFieldOrPropertyWithValue("attach", attachSample());
     }
 
+    
     @ParameterizedTest
     @ValueSource(longs = {1L, 2L, 12L, 123L, 1234L, 12345L, 123456L, 123123123L, 0L, -1L})
     void shouldThrowNotFoundExceptionWhenAttachNotFound(long id) {
-        assertThrows(RuTracker4jException.class, () -> extractor.findAttachById(id));
+        assertThrows(RuTracker4jException.class, () -> parser.findAttachById(id));
     }
 
     @ParameterizedTest
     @ValueSource(longs = {1L, 2L, 12L, 123L, 1234L, 12345L, 123456L, 123123123L, 0L, -1L})
     void shouldThrowNotFoundExceptionWhenTorrentNotFound(long id) {
-        assertThrows(RuTracker4jException.class, () -> extractor.findTorrentById(id));
+        assertThrows(RuTracker4jException.class, () -> parser.findTorrentById(id));
     }
 
     @ParameterizedTest
     @ValueSource(longs = {1L, 2L, 12L, 123L, 1234L, 12345L, 123456L, 123123123L, 0L, -1L})
     void shouldThrowNotFoundExceptionWhenTopicNotFound(long id) {
-        assertThrows(RuTracker4jException.class, () -> extractor.findTopicById(id));
+        assertThrows(RuTracker4jException.class, () -> parser.findTopicById(id));
     }
 
     @ParameterizedTest
     @ValueSource(longs = {1L, 2L, 12L, 1234L, 12345L, 123456L, 123123123L, 0L, -1L})
     void shouldThrowNotFoundExceptionWhenCategoryNotFound(long id) {
-        assertThrows(RuTracker4jException.class, () -> extractor.findCategoryById(id));
+        assertThrows(RuTracker4jException.class, () -> parser.findCategoryById(id));
     }
 
     @ParameterizedTest
     @ValueSource(longs = {6231554L, 6091099L, 6502335L})
     void shouldReturnTopicsByIds(long id) throws RuTracker4jException {
-        Topic topic = extractor.findTopicById(id);
+        Topic topic = parser.findTopicById(id);
 
         assertThat(topic)
                 .isNotNull()
@@ -129,7 +129,7 @@ class PageParserTest {
     @ParameterizedTest
     @ValueSource(longs = {6231554L, 6091099L, 6502335L})
     void shouldReturnAttachesByIds(long id) throws RuTracker4jException {
-        Attach attach = extractor.findAttachById(id);
+        Attach attach = parser.findAttachById(id);
 
         assertThat(attach)
                 .isNotNull()
@@ -139,7 +139,7 @@ class PageParserTest {
     @ParameterizedTest
     @ValueSource(longs = {6231554L, 6091099L, 6502335L})
     void shouldReturnTorrentsByIds(long id) throws RuTracker4jException {
-        Torrent torrent = extractor.findTorrentById(id);
+        Torrent torrent = parser.findTorrentById(id);
 
         assertThat(torrent)
                 .isNotNull()
@@ -149,16 +149,16 @@ class PageParserTest {
     @ParameterizedTest
     @ValueSource(longs = {2093L, 2475L, 2527})
     void shouldReturnCategoriesByIds(long id) throws RuTracker4jException {
-        Category category = extractor.findCategoryById(id);
+        Category category = parser.findCategoryById(id);
 
         assertThat(category)
                 .isNotNull()
                 .hasNoNullFieldsOrProperties();
     }
-
+    
     @Test
     void shouldReturnAllCategories() throws ParseException {
-        Collection<Category> categories = extractor.getAllCategories();
+        Collection<Category> categories = parser.getAllCategories();
 
         assertThat(categories)
                 .isNotNull()
@@ -167,40 +167,38 @@ class PageParserTest {
     }
 
     public Category categorySample() {
-        return category(9L, "Русские сериалы");
+        return category();
     }
 
     public Attach attachSample() {
-        return attach(6499423L, 2.42f, SizeType.GB, torrentSample());
+        return attach();
     }
 
     public Torrent torrentSample() {
-        return torrent(6499423L,
-                "https://rutracker.org/forum/dl.php?t=6499423",
-                "magnet:?xt=urn:btih:E2A33CA1D2A5BB1304B98C5164A05094E88F2198&tr=http%3A%2F%2Fbt.t-ru.org%2Fann%3Fmagnet");
+        return torrent();
     }
 
-    private Category category(long id, String name) {
+    private Category category() {
         return Category.builder()
-                .id(id)
-                .name(name)
+                .id(9L)
+                .name("Русские сериалы")
                 .build();
     }
 
-    private Torrent torrent(long id, String link, String magnetLink) {
+    private Torrent torrent() {
         return Torrent.builder()
-                .id(id)
-                .link(link)
-                .magnetLink(magnetLink)
+                .id(6499423L)
+                .link("https://rutracker.org/forum/dl.php?t=6499423")
+                .magnetLink("magnet:?xt=urn:btih:E2A33CA1D2A5BB1304B98C5164A05094E88F2198&tr=http%3A%2F%2Fbt.t-ru.org%2Fann%3Fmagnet")
                 .build();
     }
 
-    private Attach attach(long id, float size, SizeType type, Torrent torrent) {
+    private Attach attach() {
         return Attach.builder()
-                .id(id)
-                .size(size)
-                .type(type)
-                .torrent(torrent)
+                .id(6499423L)
+                .size((float) 2.42)
+                .type(SizeType.GB)
+                .torrent(torrent())
                 .build();
     }
 }

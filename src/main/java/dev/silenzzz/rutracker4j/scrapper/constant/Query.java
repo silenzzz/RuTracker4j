@@ -27,7 +27,7 @@ public enum Query {
     FILE_SIZE("span[id=\"tor-size-humn\"]"),
     TOPIC_ROW("tr[class=\"tCenter hl-tr\"]"),
     TOPIC_CATEGORY_ROW("a[class=\"gen f ts-text\"]"),
-    TOPIC_TITLE_ROW("a[class=\"med tLink tt-text ts-text hl-tags bold tags-initialized\"]"),
+    TOPIC_TITLE_ROW("a[class=\"med tLink tt-text ts-text hl-tags bold\"]"),
     ;
 
     private final String value;

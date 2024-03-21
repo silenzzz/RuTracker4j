@@ -15,12 +15,12 @@ import lombok.NonNull;
 
 import java.util.Collection;
 
-public class DefaultRuTracker4jClient implements RuTracker4jClient {
+public class RuTracker4jDefaultClient implements RuTracker4jClient {
 
     private final PageParser parser;
     private final SearchEngine search;
 
-    public DefaultRuTracker4jClient(@NonNull AccountCredentials credentials) throws RuTracker4jException {
+    public RuTracker4jDefaultClient(@NonNull AccountCredentials credentials) throws RuTracker4jException {
         JSoupHttpClient client = new JSoupHttpClient(credentials, null);
         this.parser = new PageParser(client);
         this.search = new SearchEngine(parser);

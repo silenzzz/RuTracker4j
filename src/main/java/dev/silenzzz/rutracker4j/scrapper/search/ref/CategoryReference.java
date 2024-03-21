@@ -1,5 +1,6 @@
 package dev.silenzzz.rutracker4j.scrapper.search.ref;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 
@@ -11,6 +12,7 @@ import lombok.Value;
  */
 @Value
 @Builder
+@AllArgsConstructor
 public class CategoryReference {
 
     long id;
