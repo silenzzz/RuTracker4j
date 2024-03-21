@@ -1,4 +1,4 @@
-package dev.silenzzz.rutracker4j.exception;
+package dev.silenzzz.rutracker4j.scrapper.exception;
 
 import java.io.IOException;
 
@@ -8,21 +8,21 @@ import java.io.IOException;
  * @see <a href="https://github.com/silenzzz">github.com/silenzzz</a>
  * @see <a href="mailto:silenzzzdev@gmail.com">silenzzz</a>
  */
-public class RuTrackerException extends IOException {
+public class RuTracker4jException extends IOException {
 
-    public RuTrackerException() {
+    public RuTracker4jException() {
         super();
     }
 
-    public RuTrackerException(String message) {
+    public RuTracker4jException(String message) {
         super(message);
     }
 
-    public RuTrackerException(Throwable cause) {
+    public RuTracker4jException(Throwable cause) {
         super(cause);
     }
 
-    public RuTrackerException(String message, Throwable cause) {
+    public RuTracker4jException(String message, Throwable cause) {
         super(message, cause);
     }
 }

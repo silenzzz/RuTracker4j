@@ -1,4 +1,4 @@
-package dev.silenzzz.rutracker4j.net;
+package dev.silenzzz.rutracker4j.scrapper.net;
 
 import java.util.HashMap;
 import java.util.Map;

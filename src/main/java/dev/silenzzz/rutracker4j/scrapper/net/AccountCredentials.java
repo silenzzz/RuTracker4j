@@ -1,4 +1,4 @@
-package dev.silenzzz.rutracker4j.value;
+package dev.silenzzz.rutracker4j.scrapper.net;
 
 import lombok.Value;
 

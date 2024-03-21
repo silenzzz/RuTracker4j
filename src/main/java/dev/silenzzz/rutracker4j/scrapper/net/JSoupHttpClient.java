@@ -1,17 +1,14 @@
-package dev.silenzzz.rutracker4j.net;
+package dev.silenzzz.rutracker4j.scrapper.net;
 
 import com.google.common.collect.ImmutableMap;
-import dev.silenzzz.rutracker4j.constant.ErrorMessage;
-import dev.silenzzz.rutracker4j.constant.URL;
-import dev.silenzzz.rutracker4j.constant.Query;
-import dev.silenzzz.rutracker4j.exception.RuTrackerAuthenticationException;
-import dev.silenzzz.rutracker4j.exception.RuTrackerConnectionException;
-import dev.silenzzz.rutracker4j.exception.RuTrackerException;
-import dev.silenzzz.rutracker4j.exception.RuTrackerIncorrectCaptchaException;
-import dev.silenzzz.rutracker4j.exception.RuTrackerParseException;
-import dev.silenzzz.rutracker4j.value.AccountCredentials;
-import org.jsoup.Connection.Response;
+import dev.silenzzz.rutracker4j.scrapper.constant.URL;
+import dev.silenzzz.rutracker4j.scrapper.exception.RuTracker4jException;
+import dev.silenzzz.rutracker4j.scrapper.parse.PageParser;
+import dev.silenzzz.rutracker4j.scrapper.net.exception.AuthenticationException;
+import dev.silenzzz.rutracker4j.scrapper.net.exception.ConnectionException;
+import dev.silenzzz.rutracker4j.scrapper.net.exception.IncorrectCaptchaException;
 import org.jsoup.Connection.Method;
+import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -31,9 +28,9 @@ import java.util.Optional;
  */
 public class JSoupHttpClient {
 
-    private static final Map<ErrorMessage, RuTrackerException> messageToException = ImmutableMap.of( // TODO: Map.ofEntries NOSONAR
-            ErrorMessage.INVALID_LOGIN_OR_PASSWORD, new RuTrackerAuthenticationException(ErrorMessage.INVALID_LOGIN_OR_PASSWORD.getEnValue()),
-            ErrorMessage.CAPTCHA_TRY_AGAIN, new RuTrackerIncorrectCaptchaException(ErrorMessage.CAPTCHA_TRY_AGAIN.getEnValue())
+    private static final Map<ErrorMessage, RuTracker4jException> messageToException = ImmutableMap.of( // NOSONAR
+            ErrorMessage.INVALID_LOGIN_OR_PASSWORD, new AuthenticationException(ErrorMessage.INVALID_LOGIN_OR_PASSWORD.getEnValue()),
+            ErrorMessage.CAPTCHA_TRY_AGAIN, new IncorrectCaptchaException(ErrorMessage.CAPTCHA_TRY_AGAIN.getEnValue())
     );
 
     private static final Map<String, String> headers = ImmutableMap.of( // TODO ofEntries NOSONAR
@@ -46,22 +43,22 @@ public class JSoupHttpClient {
     private final AccountCredentials credentials;
     private final Proxy proxy;
 
-    public JSoupHttpClient(AccountCredentials credentials, @Nullable Proxy proxy) throws RuTrackerException {
+    public JSoupHttpClient(AccountCredentials credentials, @Nullable Proxy proxy) throws RuTracker4jException {
         this.credentials = credentials;
         this.proxy = proxy;
 
         authenticate();
     }
 
-    public Document fetch(String url) throws RuTrackerConnectionException {
+    public Document fetch(String url) throws ConnectionException {
         return fetch(url, Method.GET, Collections.emptyMap());
     }
 
-    public Document fetch(String url, Method method, Map<String, String> payload) throws RuTrackerConnectionException {
+    public Document fetch(String url, Method method, Map<String, String> payload) throws ConnectionException {
         try {
             return call(url, method, payload).parse();
         } catch (IOException e) {
-            throw new RuTrackerConnectionException(e);
+            throw new ConnectionException(e);
         }
     }
 
@@ -75,13 +72,13 @@ public class JSoupHttpClient {
                 .execute();
 
         if (response.statusCode() != 200 && response.statusCode() != 404) { // He always returns 200 if authenticated
-            throw new RuTrackerConnectionException();
+            throw new ConnectionException();
         }
 
         return response;
     }
 
-    private void authenticate() throws RuTrackerException {
+    private void authenticate() throws RuTracker4jException {
         final String username = credentials.getUsername();
         final String password = credentials.getPassword();
 
@@ -98,34 +95,34 @@ public class JSoupHttpClient {
             );
 
             String url = Optional.of(response.url().toString()).orElseThrow(() ->
-                    new RuTrackerConnectionException(String.format("Invalid url: %s", response.url())));
+                    new ConnectionException(String.format("Invalid url: %s", response.url())));
 
             if (!url.equals(URL.INDEX.getValue()) && !url.equals(URL.LOGIN.getValue())) {
-                throw new RuTrackerConnectionException(String.format("Invalid redirect: %s", url));
+                throw new ConnectionException(String.format("Invalid redirect: %s", url));
             }
 
             Map<String, String> cookies = response.cookies();
             document = response.parse();
 
             if (cookies.isEmpty() && cookieCache.isEmpty()) {
-                String errorMessage = Query.LOGIN_ERROR.getSelectedElementsValue(document.getAllElements());
+                String errorMessage = PageParser.getErrorMessage(document);
 
                 ErrorMessage message = Arrays.stream(ErrorMessage.values())
                         .filter(e -> e.getRuValue().equals(errorMessage))
                         .findFirst()
-                        .orElseThrow(RuTrackerParseException::new);
+                        .orElseThrow(AuthenticationException::new);
 
                 throw messageToException.get(message);
             }
             cookieCache.update(cookies);
-        } catch (RuTrackerException e) {
+        } catch (RuTracker4jException e) {
             throw e;
-        } catch (IOException e) {
-            throw new RuTrackerParseException(e);
+        } catch (NullPointerException | IOException e) {
+            throw new AuthenticationException(e);
         }
     }
 
-    public Map<String, String> refreshCookies() throws RuTrackerException {
+    public Map<String, String> refreshCookies() throws RuTracker4jException {
         authenticate();
         return getCookies();
     }

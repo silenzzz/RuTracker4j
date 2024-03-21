@@ -1,10 +1,12 @@
 package dev.silenzzz.rutracker4j.net;
 
-import dev.silenzzz.rutracker4j.exception.RuTrackerException;
-import dev.silenzzz.rutracker4j.value.AccountCredentials;
+import dev.silenzzz.rutracker4j.scrapper.exception.RuTracker4jException;
+import dev.silenzzz.rutracker4j.scrapper.net.AccountCredentials;
+import dev.silenzzz.rutracker4j.scrapper.net.JSoupHttpClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.condition.EnabledIf;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -16,9 +18,14 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
  * @see <a href="mailto:silenzzzdev@gmail.com">silenzzz</a>
  */
 @Timeout(30)
+@EnabledIf(value = "ifEnvironmentVariablesSet")
 class JSoupHttpClientTest {
 
     private JSoupHttpClient client;
+
+    private static boolean ifEnvironmentVariablesSet() {
+        return System.getenv("USERNAME") != null && System.getenv("PASSWORD") != null;
+    }
 
     @BeforeEach
     @Test
@@ -35,7 +42,7 @@ class JSoupHttpClientTest {
     }
 
     @Test
-    void shouldRefreshAndReturnCookies() throws RuTrackerException {
+    void shouldRefreshAndReturnCookies() throws RuTracker4jException {
         assertThat(client.refreshCookies())
                 .isNotNull()
                 .isNotEmpty()

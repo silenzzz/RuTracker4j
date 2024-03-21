@@ -1,13 +1,7 @@
-package dev.silenzzz.rutracker4j.constant;
+package dev.silenzzz.rutracker4j.scrapper.constant;
 
-import dev.silenzzz.rutracker4j.exception.RuTrackerParseException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
-
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * @author silenzzz
@@ -15,6 +9,7 @@ import java.util.Optional;
  * @see <a href="https://github.com/silenzzz">github.com/silenzzz</a>
  * @see <a href="mailto:silenzzzdev@gmail.com">silenzzz</a>
  */
+@SuppressWarnings("SpellCheckingInspection")
 @Getter
 @RequiredArgsConstructor
 public enum Query {
@@ -30,26 +25,11 @@ public enum Query {
     TORRENT_FILE_DOWNLOAD_LINK("a[href^=\"dl.php?t=\"]"),
     TORRENT_FILE_DOWNLOAD_MAGNET_LINK("a[class=\"med magnet-link\"]"),
     FILE_SIZE("span[id=\"tor-size-humn\"]"),
+    TOPIC_ROW("tr[class=\"tCenter hl-tr\"]"),
+    TOPIC_CATEGORY_ROW("a[class=\"gen f ts-text\"]"),
+    TOPIC_TITLE_ROW("a[class=\"med tLink tt-text ts-text hl-tags bold tags-initialized\"]"),
     ;
 
     private final String value;
 
-    public String getSelectedElementsValue(Elements elements) throws RuTrackerParseException {
-        try {
-            // @formatter:off
-            return Optional.of(Objects.requireNonNull(
-                    elements.select(this.value)
-                            .first())
-                            .text()
-                    )
-                    .orElseThrow(RuTrackerParseException::new);
-            // @formatter:on
-        } catch (NullPointerException e) {
-            throw new RuTrackerParseException(e);
-        }
-    }
-
-    public String getSelectedElementsValue(Document document) throws RuTrackerParseException {
-        return getSelectedElementsValue(document.select(this.getValue()));
-    }
 }

@@ -1,4 +1,4 @@
-package dev.silenzzz.rutracker4j.constant;
+package dev.silenzzz.rutracker4j.scrapper.constant;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

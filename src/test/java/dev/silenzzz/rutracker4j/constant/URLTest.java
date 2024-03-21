@@ -1,5 +1,6 @@
 package dev.silenzzz.rutracker4j.constant;
 
+import dev.silenzzz.rutracker4j.scrapper.constant.URL;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

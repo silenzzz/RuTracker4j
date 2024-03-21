@@ -9,6 +9,7 @@
     <version>0.0.1-SNAPSHOT</version>
 
     <properties>
+        <httpclient.version>4.5.14</httpclient.version>
         <guava.version>33.0.0-jre</guava.version>
         <mockito-core.version>5.7.0</mockito-core.version>
         <assertj-core.version>3.16.1</assertj-core.version>
@@ -55,6 +56,12 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${commons-lang3.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${httpclient.version}</version>
         </dependency>
 
         <dependency>

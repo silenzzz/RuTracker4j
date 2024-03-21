@@ -1,17 +1,19 @@
-package dev.silenzzz.rutracker4j.extractor;
+package dev.silenzzz.rutracker4j.scrapper.parse;
 
-import dev.silenzzz.rutracker4j.constant.Query;
-import dev.silenzzz.rutracker4j.constant.SizeType;
-import dev.silenzzz.rutracker4j.constant.URL;
 import dev.silenzzz.rutracker4j.domain.Attach;
 import dev.silenzzz.rutracker4j.domain.Category;
 import dev.silenzzz.rutracker4j.domain.Topic;
 import dev.silenzzz.rutracker4j.domain.Torrent;
-import dev.silenzzz.rutracker4j.exception.RuTrackerConnectionException;
-import dev.silenzzz.rutracker4j.exception.RuTrackerException;
-import dev.silenzzz.rutracker4j.exception.RuTrackerParseException;
-import dev.silenzzz.rutracker4j.exception.RuTrackerTopicNotFoundException;
-import dev.silenzzz.rutracker4j.net.JSoupHttpClient;
+import dev.silenzzz.rutracker4j.domain.constant.SizeType;
+import dev.silenzzz.rutracker4j.scrapper.constant.Query;
+import dev.silenzzz.rutracker4j.scrapper.constant.URL;
+import dev.silenzzz.rutracker4j.scrapper.exception.RuTracker4jException;
+import dev.silenzzz.rutracker4j.scrapper.parse.exception.ParseException;
+import dev.silenzzz.rutracker4j.scrapper.parse.exception.TopicNotFoundException;
+import dev.silenzzz.rutracker4j.scrapper.net.JSoupHttpClient;
+import dev.silenzzz.rutracker4j.scrapper.search.model.SearchResult;
+import dev.silenzzz.rutracker4j.scrapper.search.ref.CategoryReference;
+import dev.silenzzz.rutracker4j.scrapper.search.ref.TopicReference;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
@@ -28,18 +30,14 @@ import java.util.Optional;
  * @see <a href="https://github.com/silenzzz">github.com/silenzzz</a>
  * @see <a href="mailto:silenzzzdev@gmail.com">silenzzz</a>
  */
-public class PageDataExtractor {
+public class PageParser {
 
     private final JSoupHttpClient client;
 
     private final Map<Long, Category> categoryCache;
 
-    public PageDataExtractor(JSoupHttpClient client) throws RuTrackerException {
+    public PageParser(JSoupHttpClient client) throws RuTracker4jException {
         this.client = client;
-
-        if (client.getCookies().isEmpty()) {
-            throw new RuTrackerConnectionException();
-        }
 
         try {
             Document document = client.fetch(URL.CATEGORIES.getValue());
@@ -58,24 +56,55 @@ public class PageDataExtractor {
                     .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue()), HashMap::putAll);
 
             if (categories.isEmpty()) {
-                throw new RuTrackerParseException();
+                throw new ParseException();
             }
 
             categoryCache = categories;
 
-        } catch (RuTrackerException e) {
+        } catch (RuTracker4jException e) {
             throw e;
         } catch (Exception e) {
-            throw new RuTrackerException(e);
+            throw new RuTracker4jException(e);
         }
     }
 
-    public Topic findTopicById(long id) throws RuTrackerException {
+    public SearchResult parseSearchResultPage(String url) throws RuTracker4jException {
+        Document document = client.fetch(url);
+        SearchResult result = new SearchResult();
+
+        document.select(Query.TOPIC_ROW.getValue())
+                .forEach(e -> result.addTopicReference(TopicReference.builder()
+                        .id(Long.parseLong(e.select(Query.TOPIC_TITLE.getValue()).attr("data-topic_id")))
+                        .title(e.select(Query.TOPIC_TITLE_ROW.getValue()).text())
+
+                        .categoryReference(CategoryReference.builder()
+                                .id(Long.parseLong(e.select(Query.TOPIC_CATEGORY_ROW.getValue())
+                                        .attr("href")
+                                        .replace("viewtopic.php?t=", "")))
+
+                                .title(e.select(Query.TOPIC_CATEGORY_ROW.getValue()).text())
+                                .build())
+                        .build())
+                );
+
+        return result;
+    }
+
+    public static String getErrorMessage(Document document) throws ParseException {
+        try {
+            //noinspection DataFlowIssue
+            return document.select(Query.LOGIN_ERROR.getValue()).first().text();
+        } catch (NullPointerException e) {
+            throw new ParseException(e);
+        }
+    }
+
+    public Topic findTopicById(long id) throws RuTracker4jException {
         try {
             Document document = client.fetch(URL.TOPIC.insertId(id));
 
             if (document.select(Query.TOPIC_NOT_FOUND.getValue()).first() != null) {
-                throw new RuTrackerTopicNotFoundException(String.format("Topic with given id=%d not found", id));
+                throw new TopicNotFoundException(String.format("Topic with given id=%d not found", id));
             }
 
             //noinspection DataFlowIssue
@@ -85,42 +114,42 @@ public class PageDataExtractor {
                     .categories(getCategories(document))
                     .attach(getAttach(id, document))
                     .build();
-        } catch (RuTrackerException e) {
+        } catch (RuTracker4jException e) {
             throw e;
         } catch (Exception e) {
-            throw new RuTrackerException(e);
+            throw new RuTracker4jException(e);
         }
     }
 
-    public Attach findAttachById(long id) throws RuTrackerException {
+    public Attach findAttachById(long id) throws RuTracker4jException {
         try {
             return getAttach(id, client.fetch(URL.TOPIC.insertId(id)));
-        } catch (RuTrackerException e) {
+        } catch (RuTracker4jException e) {
             throw e;
         } catch (Exception e) {
-            throw new RuTrackerException();
+            throw new RuTracker4jException();
         }
     }
 
-    public Category findCategoryById(long id) throws RuTrackerParseException {
-        return Optional.ofNullable(categoryCache.get(id)).orElseThrow(RuTrackerParseException::new);
+    public Category findCategoryById(long id) throws ParseException {
+        return Optional.ofNullable(categoryCache.get(id)).orElseThrow(ParseException::new);
     }
 
-    public Collection<Category> getAllCategories() throws RuTrackerParseException {
-        return Optional.of(categoryCache.values()).orElseThrow(RuTrackerParseException::new);
+    public Collection<Category> getAllCategories() throws ParseException {
+        return Optional.of(categoryCache.values()).orElseThrow(ParseException::new);
     }
 
-    public Torrent findTorrentById(long id) throws RuTrackerException {
+    public Torrent findTorrentById(long id) throws RuTracker4jException {
         try {
             return getTorrent(id, client.fetch(URL.TOPIC.insertId(id)));
-        } catch (RuTrackerException e) {
+        } catch (RuTracker4jException e) {
             throw e;
         } catch (Exception e) {
-            throw new RuTrackerException(e);
+            throw new RuTracker4jException(e);
         }
     }
 
-    private Attach getAttach(long id, Document document) throws RuTrackerParseException {
+    private Attach getAttach(long id, Document document) throws ParseException {
         try {
             //noinspection DataFlowIssue
             String[] rawSize = document.select(Query.FILE_SIZE.getValue()).first().text().split(" ");
@@ -132,26 +161,26 @@ public class PageDataExtractor {
                     .torrent(getTorrent(id, document))
                     .build();
         } catch (Exception e) {
-            throw new RuTrackerParseException(e);
+            throw new ParseException(e);
         }
     }
 
-    private List<Category> getCategories(Document document) throws RuTrackerParseException {
+    private List<Category> getCategories(Document document) throws ParseException {
         try {
             List<Category> categories = document.select(Query.CATEGORY.getValue()).stream()
                     .map(this::mapCategory)
                     .toList();
 
             if (categories.isEmpty()) {
-                throw new RuTrackerParseException();
+                throw new ParseException();
             }
 
             return categories;
 
-        } catch (RuTrackerParseException e) {
+        } catch (ParseException e) {
             throw e;
         } catch (Exception e) {
-            throw new RuTrackerParseException(e);
+            throw new ParseException(e);
         }
     }
 
@@ -162,7 +191,7 @@ public class PageDataExtractor {
                 .build();
     }
 
-    private Torrent getTorrent(long id, Document document) throws RuTrackerParseException {
+    private Torrent getTorrent(long id, Document document) throws ParseException {
         try {
             //noinspection DataFlowIssue
             return Torrent.builder()
@@ -171,7 +200,7 @@ public class PageDataExtractor {
                     .magnetLink(document.select(Query.TORRENT_FILE_DOWNLOAD_MAGNET_LINK.getValue()).first().attr("href"))
                     .build();
         } catch (Exception e) {
-            throw new RuTrackerParseException(e);
+            throw new ParseException(e);
         }
     }
 }

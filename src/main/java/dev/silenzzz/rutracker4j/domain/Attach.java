@@ -1,6 +1,6 @@
 package dev.silenzzz.rutracker4j.domain;
 
-import dev.silenzzz.rutracker4j.constant.SizeType;
+import dev.silenzzz.rutracker4j.domain.constant.SizeType;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.Value;
