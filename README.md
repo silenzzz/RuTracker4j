@@ -1,65 +1,16 @@
 # RuTracker4j
 
-Это Java библиотека для работы с RuTracker.org через их API.
-
-## Установка
-
-Чтобы использовать эту библиотеку, добавьте следующую зависимость в ваш файл `pom.xml`:
-
-```xml
-
-<dependency>
-    <groupId>com.example</groupId>
-    <artifactId>RuTracker4j</artifactId>
-    <version>1.0.0</version>
-</dependency>
-```
-
-## Использование
-
-Пример использования библиотеки:
-
-```java
-import com.example.RuTracker4j;
-
-public class Main {
-    public static void main(String[] args) {
-        RuTracker4j ruTracker = new RuTracker4j("your_api_key");
-        // Далее используйте методы библиотеки для взаимодействия с RuTracker.org
-    }
-}
-```
-
-## Документация
-
-Для подробной документации по использованию библиотеки, обратитесь к [JavaDocs](link).
-
-## Вклад
-
-Если вы хотите внести свой вклад в развитие проекта, пожалуйста, ознакомьтесь с [CONTRIBUTING.md](link).
-
-## Лицензия
-
-Этот проект лицензирован под [MIT лицензией](link).
-
-# RuTracker4j
-
 A Java library that provides access to RuTracker.org API.
 
 ## Features
 
-|   |   |   |
-|---|---|---|
-|   |   |   |
-|   |   |   |
-|   |   |   |
-|   |   |   |
-
-
-
 - Search for torrents by keyword
 - Get topic details
 - Download torrent file
+
+## Documentation
+
+See wiki on [GitHub](https://github.com/silenzzz/RuTracker4j/wiki).
 
 ## Installation
 
@@ -78,9 +29,9 @@ A Java library that provides access to RuTracker.org API.
 
     ```xml
     <dependency>
-        <groupId>com.github.DeMmAge</groupId>
-        <artifactId>Simple-Yaml-Transformer</artifactId>
-        <version>${project.version}</version>
+        <groupId>dev.silenzzz</groupId>
+    <artifactId>RuTracker4j</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
     </dependency>
     ```
 
@@ -92,7 +43,6 @@ import com.example.RuTracker4j;
 public class Main {
     public static void main(String[] args) {
         RuTracker4j ruTracker = new RuTracker4j("your_api_key");
-        // Далее используйте методы библиотеки для взаимодействия с RuTracker.org
     }
 }
 ```
